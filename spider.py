@@ -12,4 +12,4 @@ def run():
     spider.scan_listings()
 
 
-spider_ui = sgui.SpiderUI("Spider UI v1.0")
+spider_ui = sgui.SpiderUI("Spider UI v1.1")
