@@ -1,9 +1,6 @@
 import tkinter as tk
 import arch
 
-
-
-
 class SpiderUI:
     def __init__(self, title):
         self.title = title
