@@ -1,27 +1,48 @@
 import openpyxl
+import json
+import fileutils
+import configutil
 import hunter
 
-patch_to_excel = "C:\\Users\\Adam\\PycharmProjects\\Spider\\info.xlsx"
+class ExcelTool:
 
-# Create workbook
-wb = openpyxl.load_workbook(patch_to_excel)
+    def __init__(self):
+        self.excel_path = fileutils.get_project_file("Spider", "info.xlsx")
 
-# Feteches the current active workbook
-ws = wb.active
+        # Create workbook
+        self.wb = openpyxl.load_workbook(self.excel_path)
 
-headers = ["Emai", "First Name", "Last Name", "Phone Number", "Type"]
-header_row = 1
+        # Fetches the current active workbook
+        self.ws = self.wb.active
 
-for header in headers:
-    ws.cell(1, header_row, value=header)
-    header_row+= 1
+        self.headers = ["Email", "First Name", "Last Name", "Phone Number", "Type"]
+        self.add_headers()
+        self.col = 1
+        self.row = configutil.get_last_row()
 
-row = 2
-col = 1
+    def add_headers(self):
+        headers_row = 1
+        for header in self.headers:
+            self.ws.cell(1, headers_row, value=header)
+            headers_row += 1
 
-company_info = hunter.get_company_data("https://dunhill.net/")
-for data in company_info:
-    ws.cell(row=row, column=col, value=data)
+    def add_company_data(self, company):
+        company = hunter.get_company_json(company)
+        
+        row_difference = 1
+        for data in company["emails"]:
+            self.ws.cell(row=self.row, column=self.col, value=data['value'])
+            self.ws.cell(row=self.row, column=self.col + 1, value=data["first_name"])
+            self.ws.cell(row=self.row, column=self.col + 2, value=data["last_name"])
+            self.ws.cell(row=self.row, column=self.col + 3, value=data["phone_number"])
+            self.ws.cell(row=self.row, column=self.col + 4, value=data["type"])
+            row_difference += 1
+            self.row += 1
+        configutil.add_last_row(row_difference)
+        print("Added company data records:", len(company['emails']))
 
+    def save_file(self):
+        self.wb.save(self.excel_path)
+        print("Saved File")
 
-wb.save(patch_to_excel)
+        # print("Last row ended on:", self.last_row)

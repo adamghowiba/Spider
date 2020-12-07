@@ -13,3 +13,21 @@ def get_company_data(website):
         company_data.append((data["value"], data["first_name"], data["last_name"], data["phone_number"], data['type']))
 
     return company_data
+
+
+def get_company_json(website):
+    search_results = hunter.domain_search(website)
+
+    return search_results
+
+
+# def create_mock_data():
+#     search_results = hunter.domain_search("https://dunhill.net/")
+#     file_path = os.path.dirname(os.path.abspath(__file__))
+#     project_path = os.path.abspath(os.path.join(file_path, os.path.pardir))
+#
+#     data_path = os.path.join(project_path, 'Spider\\test.txt')
+#
+#     with open(data_path, "w") as t:
+#         json.dump(search_results, t, indent=3)
+#         t.close()
