@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
-import re
+import exceltool
 
 PATH = "C:\Program Files (x86)\chromedriver.exe"
 
@@ -21,6 +21,8 @@ class Spider:
 
         # self.should_restart = True
         self.list_number = 0
+
+        self.excel = exceltool.ExcelTool()
 
     def lookup_location_action(self):
         # Opens website
@@ -54,7 +56,7 @@ class Spider:
             if not first:
                 first = True
                 WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "placards")))
-                self.listing_elements[self.list_number].click()
+                self.listing_elements[0].click()
                 print("First listing")
 
             print("Opening Listing:", self.list_number, self.get_next_listing_page(link=True))
@@ -66,7 +68,11 @@ class Spider:
                     "/html/body/section/main/section/div[2]/div/div[2]/div/div/div[2]/div/div[2]/ul/li[2]/a")
 
                 # Print out grabbed website for testing purposes.
-                print(contact_form.get_attribute("href"))
+                company_website = contact_form.get_attribute("href")
+                if company_website is not None and company_website != "None" and not(company_website.startswith("https://www.loopnet.com/")):
+                    print(company_website)
+                    self.excel.add_company_data(company_website)
+                    self.excel.save_file()
 
             except NoSuchElementException:
                 print("Not Found")

@@ -1,6 +1,5 @@
 import arch
 import exceltool
-
 websites = []
 
 
@@ -10,4 +9,6 @@ def run():
     spider.store_current_listings()
     spider.scan_listings()
 
+
+run()
 # spider_ui = sgui.SpiderUI("Spider UI v1.0")
