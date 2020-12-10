@@ -1,14 +1,8 @@
 import arch
-import exceltool
-websites = []
 
-
+# spider_ui = ui.SpiderUI("Spider UI")
 def run():
-    spider = arch.Spider("https://www.loopnet.com", "Orlando, FL")
-    spider.lookup_location_action()
-    spider.store_current_listings()
-    spider.scan_listings()
-
+    spider = arch.Spider("https://www.loopnet.com", "Deland, FL", True)
+    spider.run()
 
 run()
-# spider_ui = sgui.SpiderUI("Spider UI v1.0")
