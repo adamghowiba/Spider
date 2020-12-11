@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from configutil import get_value, update_key
 import exceltool
-import companies
+import txtutil
 
 PATH = "C:\\Program Files (x86)\\chromedriver\\chromedriver.exe"
 
@@ -19,7 +19,7 @@ class Spider:
         self.driver = webdriver.Chrome(PATH)
         self.listing_links = []
         self.listing_elements = []
-        self.scanned_companies = companies.generate_list_of_companies()
+        self.scanned_companies = txtutil.generate_list_of_companies()
 
         # self.should_restart = True
         self.list_number = 0
@@ -54,23 +54,24 @@ class Spider:
             # TODO - Do we need to do 2 None checks
             if company_website is not None \
                     and company_website != "None" \
-                    and not company_website.startswith("https://www.loopnet.com/") \
-                    and company_website not in self.scanned_companies:
-                # Print out grabbed website for testing purposes.
-                print(company_website)
+                    and not company_website.startswith("https://www.loopnet.com/"):
+                if company_website not in self.scanned_companies:
+                    # Print out grabbed website for testing purposes.
+                    print(company_website)
 
-                # Appends the newest company scanned to the current local list
-                self.scanned_companies.append(company_website)
+                    # Appends the newest company scanned to the current local list
+                    self.scanned_companies.append(company_website)
 
-                # Also adds the company to the text file for next time.
-                companies.append_company(company_website)
+                    # Also adds the company to the text file for next time.
+                    txtutil.append_company_safe(company_website)
 
-                # Adds company data to excel file based on recent row, and saves file.
-                self.excel.add_company_data(company_website)
+                    # Adds company data to excel file based on recent row, and saves file.
+                    self.excel.add_company_data(company_website)
+                else:
+                    print("Duplicate company ignored")
         except NoSuchElementException:
             print("Not Found")
 
-    # TODO Help readability by splitting  block of code
     def scan_listings(self, should_restart=True):
         if self.resume and get_value('lastLink') != 'None':
             self.driver.get(str(get_value("lastLink")))
