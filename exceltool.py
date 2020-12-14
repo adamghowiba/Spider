@@ -1,6 +1,5 @@
 import openpyxl
-import json
-import fileutils
+import fileutil
 import configutil
 import hunter
 
@@ -8,7 +7,7 @@ import hunter
 class ExcelTool:
 
     def __init__(self):
-        self.excel_path = fileutils.get_project_file("Spider", "info.xlsx")
+        self.excel_path = fileutil.get_project_file("Spider", "info.xlsx")
 
 
         # Create workbook
