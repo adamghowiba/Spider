@@ -39,7 +39,7 @@ def add_last_row(row):
 
 def get_last_row():
     try:
-        with open(fileutil.get_project_file("Spider", "settings.yaml"), "r") as fs:
+        with open(fileutil.get_project_file("Spider", "settings.yaml")) as fs:
 
             config = yaml.safe_load(fs)
 

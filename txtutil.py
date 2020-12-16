@@ -1,3 +1,6 @@
+import fileutil
+
+
 # TODO Is this memory Intensive? Can' it be made easier.
 def create_new_line_with_text(text):
     with open("companies.txt", 'a') as a:
@@ -7,7 +10,7 @@ def create_new_line_with_text(text):
 
 
 def append_company_safe(text):
-    with open('companies.txt', 'r') as r:
+    with open(fileutil.get_project_file('Spider', 'companies.txt'), 'r+') as r:
         lines = r.readlines()
         if len(lines) == 0:
             append_company(text)
@@ -27,7 +30,7 @@ def append_company(text):
 
 def generate_list_of_companies():
     companies = []
-    with open("companies.txt", 'r') as f:
+    with open(fileutil.get_project_file('Spider', 'companies.txt'), 'r+') as f:
         for line in f.readlines():
             companies.append(str(line).strip())
             f.close()

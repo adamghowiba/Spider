@@ -1,9 +1,3 @@
-import arch
-from ui import SpiderUI
+import ui
 
-def run():
-    spider = arch.Spider("https://www.loopnet.com", "Deland, FL", True)
-    spider.run()
-
-
-ui = SpiderUI("Spider v1.0")
+spider_ui = ui.SpiderUI("Spider v1.0")
