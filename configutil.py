@@ -2,12 +2,12 @@ import yaml
 import fileutil
 
 
-def get_value(key):
+def get_value(path, key):
     with open(fileutil.get_project_file('Spider', 'settings.yaml')) as f:
         config = yaml.safe_load(f)
         f.close()
 
-        value = config['excel'][key]
+        value = config[path][key]
 
         if str(value).isdigit():
             return int(value)
@@ -15,12 +15,12 @@ def get_value(key):
             return value
 
 
-def update_key(key, value):
+def update_key(path, key, value):
     with open(fileutil.get_project_file("Spider", "settings.yaml")) as f:
         doc = yaml.safe_load(f)
 
     # Set the last row to the current row + new rows - 1 for the header
-    doc['excel'][key] = str(value)
+    doc[path][key] = str(value)
 
     with open(fileutil.get_project_file("Spider", "settings.yaml"), 'w') as f:
         yaml.safe_dump(doc, f)

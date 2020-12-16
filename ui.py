@@ -1,6 +1,7 @@
 import tkinter as tk
 import arch
 import fileutil
+import configutil
 
 
 # TODO Work on base version of UI, perferably deisgn first.
@@ -12,29 +13,36 @@ class SpiderUI:
         self.master.geometry("950x700")
         self.version = '1.0'
 
-        # self.frame = None
         self.navbar = None
         self.home = None
         self.scan = None
         self.history = None
 
-        # Buttons
+        # Initialization Spider
+        self.spider = arch.Spider("https://www.loopnet.com", 'Deland, FL', False)
 
+        # Button Images
         self.home_button_image = tk.PhotoImage(file=fileutil.get_project_file('Spider', 'assets/Home.png'))
         self.scan_button_image = tk.PhotoImage(file=fileutil.get_project_file('Spider', 'assets/Scan.png'))
         self.history_button_image = tk.PhotoImage(file=fileutil.get_project_file('Spider', 'assets/History.png'))
+        
+        # Background image
+        self.background_image = tk.PhotoImage(file=fileutil.get_project_file('Spider', 'assets/starbackground.png'))
 
+        # Create frames
         self.create_navbar()
         self.create_home_frame()
         self.create_scan_frame()
 
+        # Configure grid
         self.master.rowconfigure(0, weight=1)
         self.master.columnconfigure(0, weight=1)
         self.master.columnconfigure(1, weight=4)
 
+        # Other
         self.create_entries()
         self.create_labels()
-        self.submit_button()
+        self.scan_buttons()
 
         # Starts the TKinter GUI
         self.master.mainloop()
@@ -56,12 +64,12 @@ class SpiderUI:
         home_button = tk.Button(self.navbar, command=lambda: self.show_frame('home'), image=self.home_button_image,
                                 borderwidth=0, bg='#202040', fg='#202040', activebackground='black')
 
-        scan = tk.Button(self.navbar, command=lambda: self.show_frame('scan'), image=self.scan_button_image,
-                         borderwidth=0, bg='#202040', fg='#202040')
+        scan_button = tk.Button(self.navbar, command=lambda: self.show_frame('scan'), image=self.scan_button_image,
+                                borderwidth=0, bg='#202040', fg='#202040')
         self.history = tk.Button(self.navbar, image=self.history_button_image, borderwidth=0, bg='#202040')
 
         home_button.pack(fill=tk.X)
-        scan.pack(fill=tk.X)
+        scan_button.pack(fill=tk.X)
         self.history.pack(fill=tk.X)
 
     def create_home_frame(self):
@@ -76,7 +84,7 @@ class SpiderUI:
         scanned_box.grid_propagate(False)
         scanned_box.columnconfigure(0, weight=1)
 
-        scanned_list_label = tk.Label(scanned_box, bg='white', fg='black', font=(None, 18),  text='Listings Scanned')
+        scanned_list_label = tk.Label(scanned_box, bg='white', fg='black', font=(None, 18), text='Listings Scanned')
         scanned_list_label.grid(row=0, column=0)
 
         number_list_label = tk.Label(scanned_box, bg='white', fg='black', font=(None, 18), text='5')
@@ -105,43 +113,50 @@ class SpiderUI:
         number_list_label.grid(row=1, column=0, pady=40)
 
     def create_scan_frame(self):
-        self.scan = tk.Frame(self.master, bg='white', width=100, height=100)
+        canv = tk.Canvas(self.master, width=300, height=300)
+        canv.grid(row=0, column=1, sticky='nsew')
+
+        self.scan = tk.Frame(canv, bg='#ff5151', width=100, height=100)
         self.scan.grid(row=0, column=1, sticky='nsew')
 
+        background_label = tk.Label(canv, image=self.background_image)
+        background_label.place(x=0, y=0, relwidth=1.0, relheight=1.0)
+        # background_label.lower()
+        
         self.scan.lower()
 
     def create_entries(self, get_text=False):
         website = tk.Entry(self.scan, text="Website", width=20, bg="white")
         location = tk.Entry(self.scan, text="Location", width=20, bg="white")
-        max = tk.Entry(self.scan, text="Max Search Results", width=20, bg="white")
-
+        
+        self.scan.columnconfigure(2, weight=1)
+        
         website.grid(row=1, column=1, ipady=3, padx=7, pady=3)
-        location.grid(row=2, column=1, ipady=3, pady=3)
-        max.grid(row=3, column=1, ipady=3, pady=3)
+        location.grid(row=1, column=3, ipady=3, pady=3)
 
-        if get_text:
-            return str(website.get())
+    def scan_buttons(self):
+        submit_button = tk.Button(self.scan, command=self.start_scan, width=9, height=2, text="Start Search")
+        submit_button.columnconfigure(0, weight=0)
+        submit_button.rowconfigure(5, weight=1)
 
-    def submit_button(self):
-        submit_button = tk.Button(self.scan, width=5, height=1, text="Search")
-        submit_button.grid_columnconfigure(0, weight=0)
         submit_button.grid(row=5, column=1, pady=8)
+
+        stop_button = tk.Button(self.scan, width=5, height=2, text='Stop')
+        stop_button.grid(row=6, column=2, pady=0)
 
     def create_labels(self):
         title = tk.Label(self.scan, text='Spider v1.0', fg='black', bg='#ff5151', font=(None, 20))
-        self.scan.columnconfigure(1, weight=1)
+        # self.scan.columnconfigure(1, weight=1)
         title.grid(row=0, column=1)
 
         website_label = tk.Label(self.scan, text='Website', fg='black', bg='#ff5151')
         location_label = tk.Label(self.scan, text='Location', fg='black', bg='#ff5151')
-        max_label = tk.Label(self.scan, text='Max Values', fg='black', bg='#ff5151')
 
         website_label.grid(row=1, column=0)
-        location_label.grid(row=2, column=0)
-        max_label.grid(row=3, column=0)
+        location_label.grid(row=1, column=2)
 
-    # def start_scan(self):
-    #     spider = arch.Spider("https://www.loopnet.com", self.search_city_entry(True))
-    #     spider.lookup_location_action()
-    #     spider.store_current_listings()
-    #     spider.scan_listings()
+    def start_scan(self):
+        self.spider.run()
+
+    def stop_scan(self):
+        self.spider.save_listing()

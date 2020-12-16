@@ -16,7 +16,7 @@ class Spider:
         self.website = website
         self.resume = resume
         self.location = location
-        self.driver = webdriver.Chrome(PATH)
+        self.driver = None
         self.listing_links = []
         self.listing_elements = []
         self.scanned_companies = txtutil.generate_list_of_companies()
@@ -29,6 +29,7 @@ class Spider:
 
     def run(self):
         # if not self.resume:
+        self.driver = webdriver.Chrome(PATH)
         self.lookup_location_action()
         self.store_current_listings()
         self.scan_listings()
@@ -73,8 +74,8 @@ class Spider:
             print("Not Found")
 
     def scan_listings(self, should_restart=True):
-        if self.resume and get_value('lastLink') != 'None':
-            self.driver.get(str(get_value("lastLink")))
+        if self.resume and get_value('excel', 'lastLink') != 'None':
+            self.driver.get(str(get_value('excel', "lastLink")))
             print("Opening last link known")
             first = False
         else:
@@ -93,7 +94,7 @@ class Spider:
             self.add_company_contact()
 
             # Testing method to save/quit chrome driver. -NOT WORKING
-            if self.list_number > 20:
+            if self.list_number > 3:
                 self.save_listing()
                 break
 
@@ -114,10 +115,10 @@ class Spider:
             next_page_wrapper.click()
 
     def save_listing(self):
-        if self.list_number > 4:
-            update_key("lastLink", self.driver.current_url)
-            print("Quitting chrome driver, saving last location", self.driver.current_url)
-            self.driver.quit()
+        update_key('excel', "lastLink", self.driver.current_url)
+        update_key('home', 'listingsScanned', self.list_number)
+        print("Quitting chrome driver, saving last location", self.driver.current_url)
+        self.driver.quit()
 
     # TODO Don't need to store current listings anymore, only need first
     def store_current_listings(self):
