@@ -2,6 +2,7 @@ import tkinter as tk
 import arch
 import fileutil
 
+
 class SpiderUI:
     def __init__(self, title):
         self.title = title
@@ -21,6 +22,10 @@ class SpiderUI:
         # Get UI Entry Information
         self.location_entry = None
         self.type_options = None
+        self.options_var = None
+
+        # Labels
+        self.location_label = None
 
         # Button Images
         self.home_button_image = tk.PhotoImage(file=fileutil.get_project_file('Spider', 'assets/Home.png'))
@@ -41,9 +46,9 @@ class SpiderUI:
         self.master.columnconfigure(1, weight=4)
 
         # Other
-        self.create_entries()
         self.create_labels()
         self.scan_buttons()
+        self.create_entries()
         self.create_options_menu()
 
         # Starts the TKinter GUI
@@ -112,7 +117,6 @@ class SpiderUI:
 
     def create_entries(self, get_text=False):
         self.location_entry = tk.Entry(self.scan_frame, text="Location", width=20, bg="white")
-
         self.location_entry.grid(row=1, column=1, ipady=3, pady=3)
 
     def scan_buttons(self):
@@ -127,15 +131,15 @@ class SpiderUI:
         # self.scan.columnconfigure(1, weight=1)
         title.grid(row=0, column=1)
 
-        self.location_entry = tk.Label(self.scan_frame, text='Location', fg='white', bg='#ff5151')
-        self.location_entry.grid(row=1, column=0)
+        self.location_label = tk.Label(self.scan_frame, text='Location', fg='white', bg='#ff5151')
+        self.location_label.grid(row=1, column=0)
 
     def create_options_menu(self):
-        options_var = tk.StringVar(self.scan_frame)
-        options_var.set('For Lease')
+        self.options_var = tk.StringVar(self.scan_frame)
+        self.options_var.set('For Lease')
 
-        self.type_options = tk.OptionMenu(self.scan_frame, options_var, 'For Lease', 'For Sale')
-        self.type_options.grid(row=1, column=0)
+        self.type_options = tk.OptionMenu(self.scan_frame, self.options_var, 'For Lease', 'For Sale')
+        self.type_options.grid(row=2, column=1)
 
     def show_frame(self, name):
         if name == 'home':
@@ -155,4 +159,4 @@ class SpiderUI:
         self.spider.save_listing()
 
     def get_property_type(self):
-        return self.type_options.get(self.type_options.get())
+        return self.options_var.get()

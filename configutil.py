@@ -1,7 +1,6 @@
 import yaml
 import fileutil
 
-
 def get_value(path, key):
     with open(fileutil.get_project_file('Spider', 'settings.yaml')) as f:
         config = yaml.safe_load(f)

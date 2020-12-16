@@ -7,8 +7,7 @@ from selenium.common.exceptions import NoSuchElementException
 from configutil import get_value, update_key
 import exceltool
 import txtutil
-# import spider
-
+import ui
 PATH = "C:\\Program Files (x86)\\chromedriver\\chromedriver.exe"
 
 
@@ -29,7 +28,6 @@ class Spider:
         self.excel = exceltool.ExcelTool()
 
     def run(self):
-        # if not self.resume:
         self.driver = webdriver.Chrome(PATH)
         self.lookup_location_action()
         self.store_current_listings()
@@ -42,10 +40,10 @@ class Spider:
         print("Getting results for search location: " + self.location)
 
         # TODO - Add feature for type
-        if spider.spider_ui.get_property_type() == 'For Lease':
-            for_lease_button = self.driver.find_element_by_xpath(
-                '/html/body/section/main/section[1]/section[1]/div/div/div/form/div/div/ul/li[2]/h2/button')
-            for_lease_button.click()
+        # if spider.spider_ui.get_property_type() == 'For Lease':
+        for_lease_button = self.driver.find_element_by_xpath(
+            '/html/body/section/main/section[1]/section[1]/div/div/div/form/div/div/ul/li[2]/h2/button')
+        for_lease_button.click()
 
         location_search_box = self.driver.find_element_by_name("geography")
         location_search_box.send_keys(self.location)
