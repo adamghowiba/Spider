@@ -4,10 +4,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
 from configutil import get_value, update_key
 import exceltool
 import txtutil
 import ui
+
 PATH = "C:\\Program Files (x86)\\chromedriver\\chromedriver.exe"
 
 
@@ -20,6 +22,8 @@ class Spider:
         self.listing_links = []
         self.listing_elements = []
         self.scanned_companies = txtutil.generate_list_of_companies()
+        self.first_list_title = None
+        self.first = True
 
         # self.should_restart = True
         self.list_number = 0
@@ -40,10 +44,9 @@ class Spider:
         print("Getting results for search location: " + self.location)
 
         # TODO - Add feature for type
-        # if spider.spider_ui.get_property_type() == 'For Lease':
-        for_lease_button = self.driver.find_element_by_xpath(
-            '/html/body/section/main/section[1]/section[1]/div/div/div/form/div/div/ul/li[2]/h2/button')
-        for_lease_button.click()
+        # for_lease_button = self.driver.find_element_by_xpath(
+        #     '/html/body/section/main/section[1]/section[1]/div/div/div/form/div/div/ul/li[2]/h2/button')
+        # for_lease_button.click()
 
         location_search_box = self.driver.find_element_by_name("geography")
         location_search_box.send_keys(self.location)
@@ -79,36 +82,49 @@ class Spider:
         except NoSuchElementException:
             print("Not Found")
 
+    def get_listing_title(self):
+        try:
+            self.first_list_title = self.driver.find_element_by_xpath(
+                '/html/body/section/main/section/div[2]/div/div[1]/section/div[2]/div/h1/span[1]')
+        except NoSuchElementException:
+            self.first_list_title = self.driver.find_element_by_xpath(
+                '/html/body/section/main/section/div[2]/div/div[1]/section/div[2]/h1')
+        return self.first_list_title
+
     def scan_listings(self, should_restart=True):
         if self.resume and get_value('excel', 'lastLink') != 'None':
             self.driver.get(str(get_value('excel', "lastLink")))
             print("Opening last link known")
-            first = False
         else:
-            first = True
-        while True:
-            if first:
-                first = False
-                WebDriverWait(self.driver, 10).until(ec.presence_of_element_located((By.CLASS_NAME, "placards")))
-                self.driver.get(self.listing_links[0])
-                print("Opening First Listing")
+            WebDriverWait(self.driver, 10).until(ec.presence_of_element_located((By.CLASS_NAME, "placards")))
+            self.driver.get(self.listing_links[0])
 
+            self.driver.implicitly_wait(3)
+            self.get_listing_title()
+
+            print("Opening First Listing")
+        while True:
+            list_title = self.get_listing_title()
+
+            # If spider scans all websites save and quit
+            if self.first_list_title.text == list_title.text and self.list_number > 1:
+                self.save_listing()
+                print('Scanned all list for city')
+                break
+
+            print(self.listing_links[0])
             print("Opening Listing:", self.list_number, self.get_next_listing_page(link=True))
 
             # Appends company contact information to excel file.
             # Also checks for duplicates.
             self.add_company_contact()
 
-            # Testing method to save/quit chrome driver. -NOT WORKING
-            if self.list_number > 12:
-                self.save_listing()
-                break
-
             # Locates the next page button and clicks it
             self.get_next_listing_page()
 
             # Add one to move onto next list
             self.list_number += 1
+
 
     def get_next_listing_page(self, link=False):
         next_page_wrapper = WebDriverWait(self.driver, 10).until(ec.presence_of_element_located(
@@ -120,10 +136,12 @@ class Spider:
         else:
             next_page_wrapper.click()
 
-    def save_listing(self):
-        update_key('excel', "lastLink", self.driver.current_url)
-        update_key('home', 'listingsScanned', self.list_number)
+    def save_listing(self, end=True):
+        if not end:
+            update_key('excel', "lastLink", self.driver.current_url)
+        update_key('home', 'listingsScanned', get_value('home', 'listingsScanned') + self.list_number)
         print("Quitting chrome driver, saving last location", self.driver.current_url)
+        self.list_number = 0
         self.driver.quit()
 
     # TODO Don't need to store current listings anymore, only need first

@@ -1,6 +1,7 @@
 import tkinter as tk
 import arch
 import fileutil
+import configutil
 
 
 class SpiderUI:
@@ -84,7 +85,7 @@ class SpiderUI:
         scanned_list_label = tk.Label(scanned_box, bg='white', fg='black', font=(None, 18), text='Listings Scanned')
         scanned_list_label.grid(row=0, column=0)
 
-        number_list_label = tk.Label(scanned_box, bg='white', fg='black', font=(None, 18), text='5')
+        number_list_label = tk.Label(scanned_box, bg='white', fg='black', font=(None, 18), text=configutil.get_value('home', 'listingsScanned'))
         number_list_label.grid(row=1, column=0, pady=40)
 
         scanned_box1 = tk.Frame(self.home, bg='white', width=250, height=200)
@@ -152,7 +153,7 @@ class SpiderUI:
             raise Exception("Invalid frame given")
 
     def start_scan(self):
-        self.spider = arch.Spider("https://www.loopnet.com", self.location_entry.get(), False)
+        self.spider = arch.Spider("https://www.loopnet.com", self.location_entry.get(), True)
         self.spider.run()
 
     def stop_scan(self):
