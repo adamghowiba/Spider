@@ -40,7 +40,7 @@ class ExcelTool:
             row_difference += 1
             self.row += 1
         configutil.add_last_row(row_difference)
-        print(F"Spider added {row_difference} new records")
+        print(f'Spider added {row_difference} new records')
         self.save_file()
 
     def save_file(self):

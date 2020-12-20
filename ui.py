@@ -2,6 +2,8 @@ import tkinter as tk
 import arch
 import fileutil
 import configutil
+import threading
+import time
 
 
 class SpiderUI:
@@ -28,6 +30,10 @@ class SpiderUI:
         # Labels
         self.location_label = None
 
+        self.number_list_label = None
+
+        self.thread = None
+
         # Button Images
         self.home_button_image = tk.PhotoImage(file=fileutil.get_project_file('Spider', 'assets/Home.png'))
         self.scan_button_image = tk.PhotoImage(file=fileutil.get_project_file('Spider', 'assets/Scan.png'))
@@ -51,6 +57,8 @@ class SpiderUI:
         self.scan_buttons()
         self.create_entries()
         self.create_options_menu()
+
+        self.thread = threading.Thread(target=self.start_scan)
 
         # Starts the TKinter GUI
         self.master.mainloop()
@@ -85,8 +93,9 @@ class SpiderUI:
         scanned_list_label = tk.Label(scanned_box, bg='white', fg='black', font=(None, 18), text='Listings Scanned')
         scanned_list_label.grid(row=0, column=0)
 
-        number_list_label = tk.Label(scanned_box, bg='white', fg='black', font=(None, 18), text=configutil.get_value('home', 'listingsScanned'))
-        number_list_label.grid(row=1, column=0, pady=40)
+        self.number_list_label = tk.Label(scanned_box, bg='white', fg='black', font=(None, 18),
+                                     text=configutil.get_value('home', 'listingsScanned'))
+        self.number_list_label.grid(row=1, column=0, pady=40)
 
         scanned_box1 = tk.Frame(self.home, bg='white', width=250, height=200)
         scanned_box1.grid(row=0, column=1)
@@ -121,10 +130,10 @@ class SpiderUI:
         self.location_entry.grid(row=1, column=1, ipady=3, pady=3)
 
     def scan_buttons(self):
-        submit_button = tk.Button(self.scan_frame, command=self.start_scan, width=9, height=2, text="Start Search")
+        submit_button = tk.Button(self.scan_frame, command=self.start_thread, width=9, height=2, text="Start Search")
         submit_button.grid(row=5, column=1, pady=8)
 
-        stop_button = tk.Button(self.scan_frame, width=5, height=2, text='Stop')
+        stop_button = tk.Button(self.scan_frame, command=self.stop_scan, width=5, height=2, text='Stop')
         stop_button.grid(row=6, column=1, pady=0)
 
     def create_labels(self):
@@ -152,12 +161,19 @@ class SpiderUI:
         else:
             raise Exception("Invalid frame given")
 
+    def start_thread(self):
+        self.thread.start()
+
+    def edit_scanned_company(self, num):
+        self.number_list_label.config(text=str(num))
+
     def start_scan(self):
         self.spider = arch.Spider("https://www.loopnet.com", self.location_entry.get(), True)
         self.spider.run()
 
     def stop_scan(self):
-        self.spider.save_listing()
+        time.sleep(2)
+        self.spider.save_listing(False)
 
     def get_property_type(self):
         return self.options_var.get()
