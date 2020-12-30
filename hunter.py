@@ -5,7 +5,7 @@ hunter = PyHunter('c4e079986010a8232d7fe93767b194e6ff9f3a78')
 
 
 def get_company_data(website):
-    search_results = hunter.domain_search(website)
+    search_results = hunter.domain_search(website, limit=40, emails_type='personal')
 
     company_data = []
 
@@ -16,7 +16,7 @@ def get_company_data(website):
 
 
 def get_company_json(website):
-    search_results = hunter.domain_search(website)
+    search_results = hunter.domain_search(website, limit=40, emails_type='personal')
 
     return search_results
 

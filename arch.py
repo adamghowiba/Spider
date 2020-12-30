@@ -9,8 +9,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 from configutil import get_value, update_key
 import exceltool
 import txtutil
-import threading
-import time
+from selenium.webdriver.chrome.options import Options
 
 PATH = "C:\\Program Files (x86)\\chromedriver\\chromedriver.exe"
 
@@ -35,7 +34,18 @@ class Spider:
         self.excel = exceltool.ExcelTool()
 
     def run(self):
-        self.driver = webdriver.Chrome(PATH)
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--proxy-server='direct://'")
+        chrome_options.add_argument("--proxy-bypass-list=*")
+        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--ignore-certificate-errors')
+        self.driver = webdriver.Chrome(executable_path=PATH, options=chrome_options)
         self.lookup_location_action()
         self.store_current_listings()
         self.scan_listings()
@@ -47,9 +57,9 @@ class Spider:
         print("Getting results for search location: " + self.location)
 
         # TODO - Add feature for type
-        # for_lease_button = self.driver.find_element_by_xpath(
-        #     '/html/body/section/main/section[1]/section[1]/div/div/div/form/div/div/ul/li[2]/h2/button')
-        # for_lease_button.click()
+        for_lease_button = self.driver.find_element_by_xpath(
+            '/html/body/section/main/section[1]/section[1]/div/div/div/form/div/div/ul/li[2]/h2/button')
+        for_lease_button.click()
 
         location_search_box = self.driver.find_element_by_name("geography")
         location_search_box.send_keys(self.location)
@@ -70,11 +80,9 @@ class Spider:
             company_website = None
 
         # TODO - Do we need to do 2 None checks
-        if company_website is not None \
+        if company_website is not None and company_website != "None" \
                 and not company_website.startswith("https://www.loopnet.com/"):
             if company_website not in self.scanned_companies:
-                # Print out grabbed website for testing purposes.
-                print("Testing " + company_website)
 
                 # Appends the newest company scanned to the current local list
                 self.scanned_companies.append(company_website)
@@ -83,7 +91,7 @@ class Spider:
                 txtutil.append_company_safe(company_website)
 
                 # Adds company data to excel file based on recent row, and saves file.
-                self.excel.add_company_data(company_website)
+                # self.excel.add_company_data(company_website)
             else:
                 print("Invalid or duplicate company")
 
@@ -96,7 +104,7 @@ class Spider:
                 '/html/body/section/main/section/div[2]/div/div[1]/section/div[2]/h1')
         return listing_title.text
 
-    def scan_listings(self, should_restart=True):
+    def scan_listings(self):
         # Check if a page was closed unexpectedly
         first_listing_title = None
         if self.resume and get_value('excel', 'lastLink') != 'None':
@@ -119,11 +127,11 @@ class Spider:
                 print('Scanned all list for city')
                 break
 
-            print("Opening Listing:", self.list_number, self.get_next_listing_page(link=True))
 
             # Scans for company contact via Hunter, Appends company contact to excel. Checks duplicates
             self.add_company_contact()
 
+            print("Opening Listing:", self.list_number, self.get_next_listing_page(link=True))
             # Locates the next page button and clicks it
             self.get_next_listing_page()
 
